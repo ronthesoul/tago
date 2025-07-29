@@ -5,28 +5,47 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"tago/pkg"
 
 	"github.com/spf13/cobra"
 )
 
+var id int
+var desc string
+var name string
+var command string
+var complete bool = false
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Adds a task",
+	Short: "Adds a task to the list",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		task := pkg.Task{
+			ID:       id,
+			Name:     name,
+			Command:  command,
+			Time:     "now",
+			Desc:     desc,
+			Complete: complete}
+		record := []string{
+			strconv.Itoa(task.ID),
+			task.Name,
+			task.Command,
+			task.Time,
+			task.Desc,
+			strconv.FormatBool(task.Complete),
+		}
+		err := pkg.WriteToCSVFile(record)
+		if err != nil {
+			log.Fatalf("Error writing to CSV file: %v", err)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	addCmd.Flags().StringVarP(&desc, "desc", "d", " ", "Description of the task")
+	addCmd.Flags().StringVarP(&name, "name", "n", "task"+fmt.Sprintf("%d", id), "Name of the task")
+	addCmd.Flags().StringVarP(&command, "command", "c", " ", "Command to run")
 }
