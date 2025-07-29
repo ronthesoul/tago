@@ -13,13 +13,13 @@ func CreateJsonFile() error {
 	if err != nil {
 		return err
 	}
-	jsonFile := os.Getenv("JSON_FILE")
-	if jsonFile == "" {
-		return fmt.Errorf("JSON_FILE environment variable is not set")
+	csvFile := os.Getenv("CSV_FILE")
+	if csvFile == "" {
+		return fmt.Errorf("CSV_FILE environment variable is not set")
 	}
-	file, err := os.Create(jsonFile)
+	file, err := os.Create(csvFile)
 	if err != nil {
-		return fmt.Errorf("failed to create JSON file: %w", err)
+		return fmt.Errorf("failed to create CSV file: %w", err)
 	}
 	defer file.Close()
 	return nil

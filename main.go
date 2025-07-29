@@ -17,16 +17,16 @@ func init() {
 }
 
 func main() {
-	jsonFile := os.Getenv("JSON_FILE")
-	if _, err := os.Stat(jsonFile); os.IsNotExist(err) {
+	csvFile := os.Getenv("CSV_FILE")
+	if _, err := os.Stat(csvFile); os.IsNotExist(err) {
 		err := lib.CreateJsonFile()
 		if err != nil {
-			fmt.Printf("Error creating JSON file: %v\n", err)
+			fmt.Printf("Error creating CSV file: %v\n", err)
 			os.Exit(1)
 		}
 
 	} else if err != nil {
-		fmt.Printf("Error checking JSON file: %v\n", err)
+		fmt.Printf("Error checking CSV file: %v\n", err)
 		os.Exit(1)
 	}
 

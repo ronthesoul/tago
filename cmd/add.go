@@ -8,6 +8,7 @@ import (
 	"log"
 	"strconv"
 	"tago/pkg"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -25,7 +26,7 @@ var addCmd = &cobra.Command{
 			ID:       id,
 			Name:     name,
 			Command:  command,
-			Time:     "now",
+			Time:     time.Now().Format(time.RFC1123),
 			Desc:     desc,
 			Complete: complete}
 		record := []string{
