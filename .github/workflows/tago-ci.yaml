@@ -32,19 +32,15 @@ jobs:
           chmod +x $NOTIFY
           $NOTIFY "Starting ${{ github.event.repository.name }} Test - Commit: ${{ github.event.head_commit.message }}" $SLACK_WEBHOOK
 
-      - name: Deps cache
-        id: cache-go-deps
+      - name: Cache Go modules
         uses: actions/cache@v4
-        env:
-          cache-name: go-deps-cache
         with:
-          path: ~/godeps
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-      - name: Notify After Deps cache
-        run: |
-          $NOTIFY "Step - Deps cache completed" $SLACK_WEBHOOK
+            ${{ runner.os }}-go-
 
       - name: Install dependencies
         run: |

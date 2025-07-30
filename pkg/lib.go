@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -125,4 +126,58 @@ func SetIndex() (int, error) {
 		return 1, nil
 	}
 	return len(currentTasks) + 1, nil
+}
+
+func ExecuteCommand(command string) error {
+	cmd := exec.Command("/bin/bash", "-c", command)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("Error executing command '%s': %v\nOutput: %s", command, err, output)
+	}
+	fmt.Printf("Command '%s' executed successfully. \noutput: %s\n", command, output)
+	return nil
+}
+
+func CheckIfTaskHasCommand(task Task) bool {
+	if task.Command == "" || task.Command == " " {
+		fmt.Printf("Task %d has no command to execute.\n", task.ID)
+		return false
+	}
+	return true
+}
+
+func GetTaskWithIndex(index int) (Task, error) {
+	file, err := os.Open(os.Getenv("CSV_FILE"))
+	if err != nil {
+		return Task{}, fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	tasks, err := reader.ReadAll()
+	if err != nil {
+		return Task{}, fmt.Errorf("failed to read CSV file: %w", err)
+	}
+	if index < 1 || index > len(tasks) {
+		return Task{}, fmt.Errorf("index out of range: %d", index)
+	}
+	taskData := tasks[index-1]
+	if len(taskData) < 6 {
+		return Task{}, fmt.Errorf("task data is incomplete for index %d", index)
+	}
+	id, err := strconv.Atoi(taskData[0])
+	if err != nil {
+		return Task{}, fmt.Errorf("invalid ID for task at index %d: %w", index, err)
+	}
+	complete, err := strconv.ParseBool(taskData[5])
+	if err != nil {
+		return Task{}, fmt.Errorf("invalid complete status for task at index %d: %w", index, err)
+	}
+	return Task{
+		ID:       id,
+		Name:     taskData[1],
+		Command:  taskData[2],
+		Time:     taskData[3],
+		Desc:     taskData[4],
+		Complete: complete,
+	}, nil
 }

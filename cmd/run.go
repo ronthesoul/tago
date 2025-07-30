@@ -1,11 +1,11 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"tago/pkg"
 
 	"github.com/spf13/cobra"
 )
@@ -13,28 +13,28 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Run a specific task",
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		task, err := pkg.GetTaskWithIndex(index)
+		if err != nil {
+			fmt.Printf("Error retrieving task: %v\n", err)
+			return
+		}
+		if pkg.CheckIfTaskHasCommand(task) {
+			err := pkg.ExecuteCommand(task.Command)
+			if err != nil {
+				fmt.Printf("Error executing command: %v\n", err)
+				return
+			}
+			fmt.Printf("Task %d executed successfully.\n", index)
+		} else {
+			fmt.Printf("No command found for task %d.\n", index)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	runCmd.Flags().IntVarP(&index, "index", "i", -1, "Execute the task at the given index")
 }
