@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 	"tago/cmd"
-	lib "tago/pkg"
+	"tago/pkg"
 
 	"github.com/joho/godotenv"
 )
@@ -23,7 +23,7 @@ func init() {
 func main() {
 	csvFile := os.Getenv("CSV_FILE")
 	if _, err := os.Stat(csvFile); os.IsNotExist(err) {
-		err := lib.CreateJsonFile()
+		err := pkg.CreateCSVFile()
 		if err != nil {
 			fmt.Printf("Error creating CSV file: %v\n", err)
 			os.Exit(1)

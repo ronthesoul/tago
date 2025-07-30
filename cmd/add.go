@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var id int
+var id int = 3
 var desc string
 var name string
 var command string
@@ -19,6 +19,10 @@ var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Adds a task to the list",
 	Run: func(cmd *cobra.Command, args []string) {
+		id, err := pkg.SetIndex()
+		if err != nil {
+			log.Fatalf("Error getting index: %v", err)
+		}
 		task := pkg.Task{
 			ID:       id,
 			Name:     name,
@@ -34,7 +38,7 @@ var addCmd = &cobra.Command{
 			task.Desc,
 			strconv.FormatBool(task.Complete),
 		}
-		err := pkg.WriteToCSVFile(record)
+		err = pkg.WriteToCSVFile(record)
 		if err != nil {
 			log.Fatalf("Error writing to CSV file: %v", err)
 		}

@@ -1,40 +1,40 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"fmt"
+	"tago/pkg"
 
 	"github.com/spf13/cobra"
 )
 
-// removeCmd represents the remove command
+var index int
 var removeCmd = &cobra.Command{
 	Use:   "remove",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Number of the task to remove",
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("remove called")
+
+		if index < 0 {
+			fmt.Println("Please provide a valid task number to remove.")
+			return
+		}
+		if index == 0 {
+			fmt.Println("Cannot remove the first task. Please provide a valid task number.")
+			return
+		}
+
+		err := pkg.RemoveTaskFromCSV(index)
+		if err != nil {
+			fmt.Printf("Error removing task: %v\n", err)
+			return
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(removeCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// removeCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// removeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	removeCmd.Flags().IntVarP(&index, "index", "i", -1, "Number of the task to remove")
 }

@@ -4,12 +4,13 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/olekukonko/tablewriter"
 )
 
-func CreateJsonFile() error {
+func CreateCSVFile() error {
 	err := godotenv.Load()
 	if err != nil {
 		return err
@@ -70,4 +71,49 @@ func ReadTasksFromCsv(csvFile string) error {
 		return fmt.Errorf("failed to render table: %w", err)
 	}
 	return nil
+}
+
+func RemoveTaskFromCSV(indexToRemove int) error {
+
+	file, err := os.Open(os.Getenv("CSV_FILE"))
+	if err != nil {
+		return fmt.Errorf("failed to to open csv file: %w", err)
+
+	}
+
+	reader := csv.NewReader(file)
+	tasks, err := reader.ReadAll()
+	defer file.Close()
+
+	tasks = append(tasks[:indexToRemove-1], tasks[indexToRemove+1:]...)
+	for i := range tasks {
+		tasks[i][0] = strconv.Itoa(i + 1)
+	}
+
+	file, _ = os.Create(os.Getenv("CSV_FILE"))
+	writer := csv.NewWriter(file)
+	writer.WriteAll(tasks)
+	defer file.Close()
+	if err != nil {
+		return fmt.Errorf("failed to to open csv file: %w", err)
+	}
+	return nil
+
+}
+
+func SetIndex() (int, error) {
+	file, err := os.Open(os.Getenv("CSV_FILE"))
+	if err != nil {
+		return 0, fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	currentTasks, err := reader.ReadAll()
+	if err != nil {
+		return 0, fmt.Errorf("failed to read CSV file: %w", err)
+	}
+	if len(currentTasks) == 0 {
+		return 1, nil
+	}
+	return len(currentTasks) + 1, nil
 }
