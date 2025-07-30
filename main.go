@@ -9,22 +9,10 @@ import (
 
 	"github.com/ronthesoul/tago/cmd"
 	"github.com/ronthesoul/tago/pkg"
-
-	"github.com/joho/godotenv"
 )
 
-func init() {
-	os.Setenv("CSV_FILE", "/tmp/tago.csv")
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Printf("Error loading .env file: %v", err)
-		os.Exit(1)
-	}
-}
-
 func main() {
-	csvFile := os.Getenv("CSV_FILE")
-	if _, err := os.Stat(csvFile); os.IsNotExist(err) {
+	if _, err := os.Stat(pkg.CSVFile); os.IsNotExist(err) {
 		err := pkg.CreateCSVFile()
 		if err != nil {
 			fmt.Printf("Error creating CSV file: %v\n", err)

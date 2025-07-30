@@ -7,20 +7,12 @@ import (
 	"os/exec"
 	"strconv"
 
-	"github.com/joho/godotenv"
 	"github.com/olekukonko/tablewriter"
 )
 
 func CreateCSVFile() error {
-	err := godotenv.Load()
-	if err != nil {
-		return err
-	}
-	csvFile := os.Getenv("CSV_FILE")
-	if csvFile == "" {
-		return fmt.Errorf("CSV_FILE environment variable is not set")
-	}
-	file, err := os.Create(csvFile)
+
+	file, err := os.Create(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to create CSV file: %w", err)
 	}
@@ -29,8 +21,7 @@ func CreateCSVFile() error {
 }
 
 func WriteToCSVFile(records []string) error {
-	csvFile := os.Getenv("CSV_FILE")
-	file, err := os.OpenFile(csvFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(CSVFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -46,9 +37,9 @@ func WriteToCSVFile(records []string) error {
 	return nil
 }
 
-func ReadAllTasksFromCsv(csvFile string) error {
+func ReadAllTasksFromCsv(CSVFile string) error {
 
-	file, err := os.Open(csvFile)
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -74,8 +65,8 @@ func ReadAllTasksFromCsv(csvFile string) error {
 	return nil
 }
 
-func ReadPendingTasksFromCsv(csvFile string) error {
-	file, err := os.Open(csvFile)
+func ReadPendingTasksFromCsv(CSVFile string) error {
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -107,8 +98,8 @@ func ReadPendingTasksFromCsv(csvFile string) error {
 	return nil
 }
 
-func ReadCommandTasksFromCsv(csvFile string) error {
-	file, err := os.Open(csvFile)
+func ReadCommandTasksFromCsv(CSVFile string) error {
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -139,7 +130,7 @@ func ReadCommandTasksFromCsv(csvFile string) error {
 
 func RemoveTaskFromCSV(indexToRemove int) error {
 
-	file, err := os.Open(os.Getenv("CSV_FILE"))
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to to open csv file: %w", err)
 
@@ -160,7 +151,7 @@ func RemoveTaskFromCSV(indexToRemove int) error {
 		tasks[i][0] = strconv.Itoa(i + 1)
 	}
 
-	file, _ = os.Create(os.Getenv("CSV_FILE"))
+	file, _ = os.Create(CSVFile)
 	writer := csv.NewWriter(file)
 	err = writer.WriteAll(tasks)
 	if err != nil {
@@ -175,7 +166,7 @@ func RemoveTaskFromCSV(indexToRemove int) error {
 }
 
 func SetIndex() (int, error) {
-	file, err := os.Open(os.Getenv("CSV_FILE"))
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return 0, fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -210,7 +201,7 @@ func CheckIfTaskHasCommand(task Task) bool {
 }
 
 func GetTaskWithIndex(index int) (Task, error) {
-	file, err := os.Open(os.Getenv("CSV_FILE"))
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return Task{}, fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -246,7 +237,7 @@ func GetTaskWithIndex(index int) (Task, error) {
 }
 
 func CompleteTask(index int) error {
-	file, err := os.Open(os.Getenv("CSV_FILE"))
+	file, err := os.Open(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to open CSV file: %w", err)
 	}
@@ -264,7 +255,7 @@ func CompleteTask(index int) error {
 
 	tasks[index-1][5] = "true"
 
-	file, err = os.Create(os.Getenv("CSV_FILE"))
+	file, err = os.Create(CSVFile)
 	if err != nil {
 		return fmt.Errorf("failed to open CSV file for writing: %w", err)
 	}

@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/ronthesoul/tago/pkg"
 
@@ -23,19 +22,19 @@ var listCmd = &cobra.Command{
 	Short: "List spesified tasks",
 	Run: func(cmd *cobra.Command, args []string) {
 		if all {
-			err := pkg.ReadAllTasksFromCsv(os.Getenv("CSV_FILE"))
+			err := pkg.ReadAllTasksFromCsv(pkg.CSVFile)
 			if err != nil {
 				fmt.Printf("Error reading tasks from CSV file: %v\n", err)
 				return
 			}
 		} else if shellcommand {
-			err := pkg.ReadCommandTasksFromCsv(os.Getenv("CSV_FILE"))
+			err := pkg.ReadCommandTasksFromCsv(pkg.CSVFile)
 			if err != nil {
 				fmt.Printf("Error reading done tasks from CSV file: %v\n", err)
 				return
 			}
 		} else {
-			err := pkg.ReadPendingTasksFromCsv(os.Getenv("CSV_FILE"))
+			err := pkg.ReadPendingTasksFromCsv(pkg.CSVFile)
 			if err != nil {
 				fmt.Printf("Error reading tasks from CSV file: %v\n", err)
 				return

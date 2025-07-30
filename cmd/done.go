@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// doneCmd represents the done command
 var doneCmd = &cobra.Command{
 	Use:   "done",
 	Short: "Mark a task as done",
