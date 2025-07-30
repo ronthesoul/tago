@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"tago/pkg"
 	"time"
+
+	"github.com/ronthesoul/tago/pkg"
 
 	"github.com/spf13/cobra"
 )

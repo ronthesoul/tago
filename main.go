@@ -6,8 +6,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"tago/cmd"
-	"tago/pkg"
+
+	"github.com/ronthesoul/tago/cmd"
+	"github.com/ronthesoul/tago/pkg"
 
 	"github.com/joho/godotenv"
 )

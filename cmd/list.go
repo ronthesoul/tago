@@ -6,7 +6,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"tago/pkg"
+
+	"github.com/ronthesoul/tago/pkg"
 
 	"github.com/spf13/cobra"
 )
