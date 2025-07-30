@@ -55,9 +55,20 @@ jobs:
 
       - name: Run golangci-lint
         run: |
-          golangci-lint run
-          $NOTIFY "Step - Lint completed" $SLACK_WEBHOOK
+          set +e
+          $NOTIFY "Starting Step - Lint" $SLACK_WEBHOOK
+          golangci-lint run > lint.log 2>&1
+          STATUS=$?
+          OUTPUT=$(cat lint.log | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+          rm lint.log
 
+          if [[ $STATUS -eq 0 ]]; then
+            $NOTIFY "Step - Lint ✅ Success" $SLACK_WEBHOOK
+          else
+            $NOTIFY "Step - Lint ❌ Failed:\n\`\`\`$OUTPUT\`\`\`" $SLACK_WEBHOOK
+            exit 1
+          fi
+          
       - name: Early Build
         run: |
           set +e
@@ -89,3 +100,13 @@ jobs:
             $NOTIFY "Step - Test ❌ Failed:\n\`\`\`$OUTPUT\`\`\`" "$SLACK_WEBHOOK"
             exit 1
           fi
+
+          - name: Final pipeline result
+            if: success()
+            run: |
+              $NOTIFY "🚀 Pipeline completed successfully!" $SLACK_WEBHOOK
+
+          - name: Final pipeline failure
+            if: failure()
+            run: |
+              $NOTIFY "🔥 Pipeline failed!" $SLACK_WEBHOOK

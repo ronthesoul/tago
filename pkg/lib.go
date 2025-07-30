@@ -92,7 +92,10 @@ func RemoveTaskFromCSV(indexToRemove int) error {
 
 	file, _ = os.Create(os.Getenv("CSV_FILE"))
 	writer := csv.NewWriter(file)
-	writer.WriteAll(tasks)
+	err = writer.WriteAll(tasks)
+	if err != nil {
+		return fmt.Errorf("failed to write updated tasks to CSV file: %w", err)
+	}
 	defer file.Close()
 	if err != nil {
 		return fmt.Errorf("failed to to open csv file: %w", err)
