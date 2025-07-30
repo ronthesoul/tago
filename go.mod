@@ -1,4 +1,4 @@
-module github.com/ronthesoul/tago
+module tago
 
 go 1.22.2
 
