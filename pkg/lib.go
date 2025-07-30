@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/olekukonko/tablewriter"
 )
 
 func CreateJsonFile() error {
@@ -40,5 +41,26 @@ func WriteToCSVFile(records []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to write to CSV file: %w", err)
 	}
+	return nil
+}
+
+func ReadTasksFromCsv(csvFile string) error {
+
+	file, err := os.Open(csvFile)
+	if err != nil {
+		return fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read CSV file: %w", err)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"ID", "Name", "Command", "Time", "Description", "Complete"})
+	for _, row := range records {
+		table.Append(row)
+	}
+	table.Render()
 	return nil
 }

@@ -1,0 +1,91 @@
+name: tago-ci
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**.go'
+      - go.sum
+      - go.mod
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**.go'
+      - go.sum
+      - go.mod
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      NOTIFY: ".github/workflows/notify.sh"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Notify Start
+        run: |
+          chmod +x $NOTIFY
+          $NOTIFY "Starting ${{ github.event.repository.name }} Test - Commit: ${{ github.event.head_commit.message }}" $SLACK_WEBHOOK
+
+      - name: Deps cache
+        id: cache-go-deps
+        uses: actions/cache@v4
+        env:
+          cache-name: go-deps-cache
+        with:
+          path: ~/godeps
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+      - name: Notify After Deps cache
+        run: |
+          $NOTIFY "Step - Deps cache completed" $SLACK_WEBHOOK
+
+      - name: Install dependencies
+        run: |
+          go mod tidy
+          go mod download
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
+          $NOTIFY "Step - Dependencies installed" $SLACK_WEBHOOK
+
+      - name: Run golangci-lint
+        run: |
+          golangci-lint run
+          $NOTIFY "Step - Lint completed" $SLACK_WEBHOOK
+
+      - name: Early Build
+        run: |
+          set +e
+          $NOTIFY "Starting Step - Early Build" $SLACK_WEBHOOK
+          go build -v ./... > build.log 2>&1
+          STATUS=$?
+          OUTPUT=$(cat build.log)
+          rm build.log
+
+          if [[ $STATUS -eq 0 ]]; then
+            $NOTIFY "Step - Early Build ✅ Success" $SLACK_WEBHOOK
+          else
+            $NOTIFY "Step - Early Build ❌ Failed \n\`\`\`$OUTPUT\`\`\`" $SLACK_WEBHOOK
+            exit 1
+          fi
+
+      - name: Test
+        run: |
+          set +e
+          $NOTIFY "Starting Step - Test" "$SLACK_WEBHOOK"
+          go test -v ./... > build.log 2>&1
+          STATUS=$?
+          OUTPUT=$(cat build.log | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+          rm build.log
+
+          if [[ $STATUS -eq 0 ]]; then
+            $NOTIFY "Step - Test ✅ Success" "$SLACK_WEBHOOK"
+          else
+            $NOTIFY "Step - Test ❌ Failed:\n\`\`\`$OUTPUT\`\`\`" "$SLACK_WEBHOOK"
+            exit 1
+          fi
