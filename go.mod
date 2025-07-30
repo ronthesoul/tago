@@ -3,7 +3,6 @@ module github.com/ronthesoul/tago
 go 1.22.2
 
 require (
-	github.com/joho/godotenv v1.5.1
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/spf13/cobra v1.9.1
 )
