@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"tago/pkg"
 
 	"github.com/spf13/cobra"
 )
@@ -9,28 +10,28 @@ import (
 // doneCmd represents the done command
 var doneCmd = &cobra.Command{
 	Use:   "done",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Mark a task as done",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("done called")
+		task, error := pkg.GetTaskWithIndex(index)
+		if error != nil {
+			fmt.Printf("Error retrieving task: %v\n", error)
+			return
+		}
+		if task.Complete {
+
+			fmt.Printf("Task %d is already marked as done.\n", index)
+			return
+		}
+		if err := pkg.CompleteTask(index); err == nil {
+			fmt.Printf("Task %d marked as done successfully.\n", index)
+		} else {
+			fmt.Printf("Failed to mark task %d as done: %v\n", index, err)
+			return
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(doneCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// doneCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// doneCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	doneCmd.Flags().IntVarP(&index, "index", "i", -1, "Mark a task as done at the given index")
 }

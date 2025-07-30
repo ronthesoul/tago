@@ -11,31 +11,40 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	all          bool
+	shellcommand bool
+)
+
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all tasks",
+	Short: "List spesified tasks",
 	Run: func(cmd *cobra.Command, args []string) {
-		csvFile := os.Getenv("CSV_FILE")
-		err := pkg.ReadTasksFromCsv(csvFile)
-		if err != nil {
-			fmt.Printf("Error reading tasks from CSV file: %v\n", err)
-			return
+		if all {
+			err := pkg.ReadAllTasksFromCsv(os.Getenv("CSV_FILE"))
+			if err != nil {
+				fmt.Printf("Error reading tasks from CSV file: %v\n", err)
+				return
+			}
+		} else if shellcommand {
+			err := pkg.ReadCommandTasksFromCsv(os.Getenv("CSV_FILE"))
+			if err != nil {
+				fmt.Printf("Error reading done tasks from CSV file: %v\n", err)
+				return
+			}
+		} else {
+			err := pkg.ReadPendingTasksFromCsv(os.Getenv("CSV_FILE"))
+			if err != nil {
+				fmt.Printf("Error reading tasks from CSV file: %v\n", err)
+				return
+			}
 		}
-
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	listCmd.Flags().BoolVarP(&all, "all", "a", false, "List all tasks")
+	listCmd.Flags().BoolVarP(&shellcommand, "commands", "c", false, "List only done tasks")
 }

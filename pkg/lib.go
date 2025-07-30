@@ -46,7 +46,7 @@ func WriteToCSVFile(records []string) error {
 	return nil
 }
 
-func ReadTasksFromCsv(csvFile string) error {
+func ReadAllTasksFromCsv(csvFile string) error {
 
 	file, err := os.Open(csvFile)
 	if err != nil {
@@ -66,6 +66,69 @@ func ReadTasksFromCsv(csvFile string) error {
 			return fmt.Errorf("failed to append row to table: %w", err)
 		}
 
+	}
+	err = table.Render()
+	if err != nil {
+		return fmt.Errorf("failed to render table: %w", err)
+	}
+	return nil
+}
+
+func ReadPendingTasksFromCsv(csvFile string) error {
+	file, err := os.Open(csvFile)
+	if err != nil {
+		return fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read CSV file: %w", err)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"ID", "Name", "Command", "Time", "Description", "Complete"})
+	for _, row := range records {
+		complete, err := strconv.ParseBool(row[5])
+		if err != nil {
+			return fmt.Errorf("failed to parse complete status: %w", err)
+		}
+		if !complete {
+			err = table.Append(row)
+			if err != nil {
+				return fmt.Errorf("failed to append row to table: %w", err)
+			}
+
+		}
+	}
+	err = table.Render()
+	if err != nil {
+		return fmt.Errorf("failed to render table: %w", err)
+	}
+	return nil
+}
+
+func ReadCommandTasksFromCsv(csvFile string) error {
+	file, err := os.Open(csvFile)
+	if err != nil {
+		return fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read CSV file: %w", err)
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"ID", "Name", "Command", "Time", "Description", "Complete"})
+	for _, row := range records {
+		command := row[2]
+		if command != "" && command != " " {
+			err = table.Append(row)
+			if err != nil {
+				return fmt.Errorf("failed to append row to table: %w", err)
+			}
+
+		}
 	}
 	err = table.Render()
 	if err != nil {
@@ -180,4 +243,38 @@ func GetTaskWithIndex(index int) (Task, error) {
 		Desc:     taskData[4],
 		Complete: complete,
 	}, nil
+}
+
+func CompleteTask(index int) error {
+	file, err := os.Open(os.Getenv("CSV_FILE"))
+	if err != nil {
+		return fmt.Errorf("failed to open CSV file: %w", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	tasks, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read CSV file: %w", err)
+	}
+
+	if index < 1 || index > len(tasks) {
+		return fmt.Errorf("index out of range: %d", index)
+	}
+
+	tasks[index-1][5] = "true"
+
+	file, err = os.Create(os.Getenv("CSV_FILE"))
+	if err != nil {
+		return fmt.Errorf("failed to open CSV file for writing: %w", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	err = writer.WriteAll(tasks)
+	if err != nil {
+		return fmt.Errorf("failed to write tasks to CSV file: %w", err)
+	}
+
+	return nil
 }
