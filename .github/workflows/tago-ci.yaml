@@ -13,7 +13,7 @@ on:
       - go.sum
       - go.mod
 
-jobs:
+jobs: 
   build:
     runs-on: ubuntu-latest
     env:
