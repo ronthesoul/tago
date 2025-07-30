@@ -13,7 +13,11 @@ import (
 )
 
 func init() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Printf("Error loading .env file: %v", err)
+		os.Exit(1)
+	}
 }
 
 func main() {

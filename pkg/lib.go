@@ -59,8 +59,15 @@ func ReadTasksFromCsv(csvFile string) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header([]string{"ID", "Name", "Command", "Time", "Description", "Complete"})
 	for _, row := range records {
-		table.Append(row)
+		err = table.Append(row)
+		if err != nil {
+			return fmt.Errorf("failed to append row to table: %w", err)
+		}
+
 	}
-	table.Render()
+	err = table.Render()
+	if err != nil {
+		return fmt.Errorf("failed to render table: %w", err)
+	}
 	return nil
 }
