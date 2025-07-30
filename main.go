@@ -13,20 +13,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func ensureEnvFile() {
-	if _, err := os.Stat(".env"); os.IsNotExist(err) {
-		content := "CSV_FILE=/home/ron/tasks.csv\n"
-		err := os.WriteFile(".env", []byte(content), 0644)
-		if err != nil {
-			fmt.Println("Failed to create .env:", err)
-		} else {
-			fmt.Println(".env file created with default CSV_FILE")
-		}
-	}
-}
-
 func init() {
-	ensureEnvFile()
+	os.Setenv("CSV_FILE", "/tmp/tago.csv")
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Printf("Error loading .env file: %v", err)
