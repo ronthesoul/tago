@@ -83,6 +83,12 @@ func RemoveTaskFromCSV(indexToRemove int) error {
 
 	reader := csv.NewReader(file)
 	tasks, err := reader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("failed to read CSV file: %w", err)
+	}
+	if indexToRemove < 1 || indexToRemove > len(tasks) {
+		return fmt.Errorf("index out of range: %d", indexToRemove)
+	}
 	defer file.Close()
 
 	tasks = append(tasks[:indexToRemove-1], tasks[indexToRemove+1:]...)
